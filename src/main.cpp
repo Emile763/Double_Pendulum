@@ -35,7 +35,7 @@ void add_to_list(sf::Vector2f* data, const int &size, const sf::Vector2f &x)
 }
 
 
-
+// Double Pendulum function
 sf::Vector2f f(const float& theta1, const float& theta2, const float& v1, const float& v2, const float& dt, const float& m1, const float& m2, const float& r1, const float& r2, const float& g)
 {
     sf::Vector2f result;
@@ -46,41 +46,34 @@ sf::Vector2f f(const float& theta1, const float& theta2, const float& v1, const 
     result.y = 1/(m2*r2*r2) *(-m2*r1 *r2*result.x*cosf( theta2 -  theta1) + ( v2 - v1) * m2 * r1 * r2 *  v1 * sinf( theta2 -  theta1) - m2 * r1 * r2 *  v1 *  v2 * sinf( theta2 -  theta1) - m2 * r2 * g * sinf( theta2)); 
     return result;
 }
+
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode{1920, 1080}, "Pendulum");
+    sf::RenderWindow window(sf::VideoMode({1920, 1080}), "Pendulum");
 
     sf::CircleShape point1(2.f);
     point1.setFillColor(sf::Color::Magenta);
-    point1.setOrigin(2,2);
+    point1.setOrigin({2.f,2.f});
 
     sf::CircleShape point2(2.f);
     point2.setFillColor(sf::Color::Yellow);
-    point2.setOrigin(2,2);
-
-    sf::Vertex line1[] = 
-    {
-        sf::Vertex(sf::Vector2f()),
-        sf::Vertex(sf::Vector2f())
-    };
+    point2.setOrigin({2.f,2.f});
+    
+    sf::Vertex line1[2];
     line1[0].color = sf::Color::Magenta;
     line1[1].color = sf::Color::Magenta;
     
-    sf::Vertex line2[] = 
-    {
-        sf::Vertex(sf::Vector2f()),
-        sf::Vertex(sf::Vector2f())
-    };
+    sf::Vertex line2[2];
     line2[0].color = sf::Color::Yellow;
     line2[1].color = sf::Color::Yellow;
     sf::Vector2f O = {1920/2 , 500};
 
     sf::CircleShape masse1(20.f);
-    masse1.setOrigin(20.f, 20.f);
+    masse1.setOrigin({20.f, 20.f});
     masse1.setFillColor(sf::Color::Red);
 
     sf::CircleShape masse2(20.f);
-    masse2.setOrigin(20.f, 20.f);
+    masse2.setOrigin({20.f, 20.f});
     masse2.setFillColor(sf::Color::Red);
 
 
@@ -104,8 +97,8 @@ int main()
     float v1 = 0;
     float v2 = 0;
 
-    masse1.setPosition(O.x - l1 * std::sinf(theta1), O.y + l1 * std::cosf(theta1));
-    masse2.setPosition(masse1.getPosition().x - l2 * std::sinf(theta2), masse1.getPosition().y + l2 * std::cosf(theta2));
+    masse1.setPosition({O.x - l1 * std::sinf(theta1), O.y + l1 * std::cosf(theta1)});
+    masse2.setPosition({masse1.getPosition().x - l2 * std::sinf(theta2), masse1.getPosition().y + l2 * std::cosf(theta2)});
     
     float data1[100] = {0};
     float data2[100] = {0};
@@ -127,10 +120,9 @@ int main()
     float dt = 0;
     while(window.isOpen())
     {
-        sf::Event event;
-        while(window.pollEvent(event))
+        while(const std::optional event = window.pollEvent())
         {
-            if(event.type == sf::Event::Closed)
+            if(event->is<sf::Event::Closed>()) 
                 window.close();
         }
         clock_t n_time = std::clock();
@@ -146,7 +138,7 @@ int main()
                 v2 = 0;
             }else
             {
-            
+                // Runge Kutta
                 sf::Vector2f k1 = f(theta1, theta2, v1, v2, dt, m1, m2, r1, r2, g);
                 sf::Vector2f k2 = f(theta1 + dt/2 * v1, theta2 + dt/2 * v2, v1 + dt/2 * k1.x, v2+ dt/2 * k1.y, dt, m1, m2, r1, r2, g);
                 sf::Vector2f k3 = f(theta1 + dt/2 * v1 + dt*dt/4 * k1.x, theta2 + dt/2 * v2+ dt*dt/4 * k1.y, v1 + dt/2 * k2.x, v2+ dt/2 * k2.y, dt, m1, m2, r1, r2, g);
@@ -159,12 +151,12 @@ int main()
                 v2 += dt/6 * (k1.y + 2 * k2.y + 2 * k3.y + k4.y);
 
             }
-            masse1.setPosition(O.x - l1 * std::sinf(theta1), O.y + l1 * std::cosf(theta1));
-            barre1.setRotation(180 / PI * theta1);
+            masse1.setPosition({O.x - l1 * std::sinf(theta1), O.y + l1 * std::cosf(theta1)});
+            barre1.setRotation(sf::radians(theta1));
 
             barre2.setPosition(masse1.getPosition());
-            barre2.setRotation(180 / PI * theta2);
-            masse2.setPosition(masse1.getPosition().x - l2 * std::sinf(theta2), masse1.getPosition().y + l2 * std::cosf(theta2));
+            barre2.setRotation(sf::radians(theta2));
+            masse2.setPosition({masse1.getPosition().x - l2 * std::sinf(theta2), masse1.getPosition().y + l2 * std::cosf(theta2)});
 
             if(theta1 > PI)
                 theta1 -= 2*PI;
@@ -198,7 +190,7 @@ int main()
             line2[0].color = sf::Color(255,255,255, std::min(255.f, 2000.f/(1000 - i)));
             line2[1].color = sf::Color(255,255,255, std::min(255.f,2000.f/(1000 - i- 1)));
 
-            window.draw(line2, 2, sf::Lines);
+            window.draw(line2, 2, sf::PrimitiveType::Lines);
         }
         window.draw(barre1);
         window.draw(barre2);
