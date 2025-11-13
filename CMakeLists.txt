@@ -15,6 +15,7 @@ add_subdirectory(third-party/SFML)
 
 add_executable("DoublePendulumApp" 
     src/main.cpp
+    src/DoublePendulum.cpp
     )
 target_include_directories("DoublePendulumApp" PRIVATE include)
 target_link_libraries("DoublePendulumApp" SFML::Graphics SFML::Window SFML::System)
