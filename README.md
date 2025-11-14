@@ -1,6 +1,6 @@
 # Global Description
 Project from 2024\
-Real time simulation of a double pendulum. The equations are approximated using the Runge–Kutta 4 method.\
+Real time simulation of a double pendulum. The equations are approximated using the Runge–Kutta 4 method.
 
 
 https://github.com/user-attachments/assets/e4951b28-b939-4dc8-b605-e715a6ff9c9d
